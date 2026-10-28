@@ -1,180 +1,115 @@
 import { useState } from 'react';
-import type { DailyPuzzle } from '../../schemas/dailyPuzzle';
+import type { SecretPuzzle as SecretPuzzleType } from '../../schemas/dailyPuzzle';
 
 interface SecretPuzzleProps {
-  puzzle: DailyPuzzle;
+  puzzle: SecretPuzzleType;
   onSolve: () => void;
+  onClose: () => void;
 }
 
-// Варианты ответов для каждой задачи
-const PUZZLE_OPTIONS: Record<string, string[]> = {
-  puzzle_01: [
-    'Грабитель читал утреннюю газету',
-    'Вечерние газеты выходят в 18:00',
-    'Свидетель ошибся во времени',
-    'Газету принёс кто-то другой',
-  ],
-};
+export function SecretPuzzle({ puzzle, onSolve, onClose }: SecretPuzzleProps) {
+  const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
+  const [wrongOption, setWrongOption] = useState<string | null>(null);
 
-export function SecretPuzzle({ puzzle, onSolve }: SecretPuzzleProps) {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isSolved, setIsSolved] = useState(false);
-
-  const options = PUZZLE_OPTIONS[puzzle.id] ?? [puzzle.answer, 'Вариант 2', 'Вариант 3'];
-  const correctAnswer = puzzle.answer;
-
-  const handleOptionClick = (option: string) => {
-    if (isSolved) return;
-
-    setSelectedOption(option);
-
-    // Проверяем правильность (сравнение по ключевым словам)
-    const isCorrect = option.includes('18:00') || option === correctAnswer;
-
-    if (isCorrect) {
-      setIsSolved(true);
-      setTimeout(() => {
-        onSolve();
-      }, 500);
+  const handleSelect = (option: string) => {
+    if (status === 'correct') return;
+    if (option === puzzle.correctAnswer) {
+      setStatus('correct');
+      onSolve();
+    } else {
+      setWrongOption(option);
+      setStatus('wrong');
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-lg)',
-      }}
-    >
-      {/* Заголовок */}
-      <h2
-        style={{
-          margin: 0,
-          color: 'var(--color-accent)',
-          fontFamily: 'var(--font-main)',
-          fontSize: 'var(--font-size-xl)',
-        }}
-      >
-        📰 {puzzle.title}
-      </h2>
+    <div style={{ padding: 'var(--spacing-lg)' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: 'var(--spacing-sm)' }}>{puzzle.title}</h2>
+      <p style={{ color: 'var(--color-text)', lineHeight: 1.6, marginBottom: 'var(--spacing-md)' }}>
+        {puzzle.story}
+      </p>
 
-      {/* Описание */}
-      <div
-        style={{
-          padding: 'var(--spacing-lg)',
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: 'var(--color-text)',
-            fontSize: 'var(--font-size-md)',
-            lineHeight: 1.7,
-          }}
-        >
-          {puzzle.description}
+      {puzzle.location && (
+        <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-md)' }}>
+          Место: {puzzle.location}
         </p>
-      </div>
-
-      {/* Подсказка */}
-      {puzzle.hint && !isSolved && (
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            background: 'rgba(201, 168, 76, 0.1)',
-            borderRadius: 'var(--radius-md)',
-            borderLeft: '3px solid var(--color-accent)',
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--color-text-muted)',
-              fontSize: 'var(--font-size-sm)',
-              fontStyle: 'italic',
-            }}
-          >
-            💡 {puzzle.hint}
-          </p>
-        </div>
       )}
 
-      {/* Варианты ответов */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-md)',
-        }}
-      >
-        {options.map((option, index) => {
-          const isSelected = selectedOption === option;
-          const isCorrect = isSolved && (option.includes('18:00') || option === correctAnswer);
-          const isWrong = isSelected && !isSolved && !isCorrect;
-
-          return (
-            <button
-              key={index}
-              onClick={() => handleOptionClick(option)}
-              disabled={isSolved}
-              style={{
-                padding: 'var(--spacing-lg)',
-                background: isCorrect
-                  ? 'rgba(50, 168, 82, 0.2)'
-                  : isWrong
-                  ? 'rgba(168, 50, 50, 0.2)'
-                  : 'var(--color-bg-panel)',
-                border: `2px solid ${
-                  isCorrect ? 'var(--color-success)' : isWrong ? 'var(--color-danger)' : 'var(--color-border)'
-                }`,
-                borderRadius: 'var(--radius-lg)',
-                color: 'var(--color-text)',
-                fontSize: 'var(--font-size-md)',
-                textAlign: 'left',
-                cursor: isSolved ? 'default' : 'pointer',
-                minHeight: '60px',
-                transition: 'all var(--transition-fast)',
-              }}
-            >
-              {option}
-            </button>
-          );
-        })}
+      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+        {puzzle.testimonials.map((t) => (
+          <blockquote
+            key={t.speaker}
+            style={{
+              margin: '0 0 var(--spacing-md) 0',
+              padding: 'var(--spacing-md)',
+              background: 'var(--color-bg-panel)',
+              borderLeft: '3px solid var(--color-accent)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <p style={{ margin: '0 0 var(--spacing-sm) 0', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+              {t.speaker}
+            </p>
+            <p style={{ margin: 0, color: 'var(--color-text)', lineHeight: 1.6 }}>{t.text}</p>
+          </blockquote>
+        ))}
       </div>
 
-      {/* Объяснение */}
-      {isSolved && (
-        <div
-          style={{
-            padding: 'var(--spacing-lg)',
-            background: 'rgba(50, 168, 82, 0.1)',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--color-success)',
-          }}
-        >
-          <h3
+      <p style={{ color: 'var(--color-text)', marginBottom: 'var(--spacing-md)' }}>
+        Что здесь не сходится?
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        {puzzle.options.map((option) => (
+          <button
+            key={option}
+            onClick={() => handleSelect(option)}
+            disabled={status === 'correct'}
             style={{
-              margin: '0 0 var(--spacing-sm)',
-              color: 'var(--color-success)',
-              fontSize: 'var(--font-size-md)',
-            }}
-          >
-            ✓ Верно!
-          </h3>
-          <p
-            style={{
-              margin: 0,
+              width: '100%',
+              textAlign: 'left',
+              padding: 'var(--spacing-md)',
+              background: 'var(--color-bg-panel)',
+              border:
+                wrongOption === option
+                  ? '1px solid var(--color-accent)'
+                  : '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
               color: 'var(--color-text)',
-              fontSize: 'var(--font-size-sm)',
-              lineHeight: 1.6,
+              fontSize: '1rem',
+              cursor: status === 'correct' ? 'default' : 'pointer',
             }}
           >
-            {puzzle.explanation}
-          </p>
+            {option}
+          </button>
+        ))}
+      </div>
+
+      {status === 'wrong' && (
+        <p style={{ color: 'var(--color-accent)', marginTop: 'var(--spacing-md)', textAlign: 'center' }}>
+          Не то. Перечитайте показания.
+        </p>
+      )}
+
+      {status === 'correct' && (
+        <div style={{ marginTop: 'var(--spacing-lg)' }}>
+          <p style={{ color: 'var(--color-text)', lineHeight: 1.6 }}>{puzzle.explanation}</p>
+          <button
+            onClick={onClose}
+            style={{
+              width: '100%',
+              marginTop: 'var(--spacing-md)',
+              padding: 'var(--spacing-md)',
+              background: 'transparent',
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+          >
+            К депешам
+          </button>
         </div>
       )}
     </div>

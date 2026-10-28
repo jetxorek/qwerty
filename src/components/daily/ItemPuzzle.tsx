@@ -1,182 +1,105 @@
 import { useState } from 'react';
-import type { DailyPuzzle } from '../../schemas/dailyPuzzle';
+import type { ItemPuzzle as ItemPuzzleType } from '../../schemas/dailyPuzzle';
 
 interface ItemPuzzleProps {
-  puzzle: DailyPuzzle;
+  puzzle: ItemPuzzleType;
   onSolve: () => void;
+  onClose: () => void;
 }
 
-interface ItemOption {
-  id: string;
-  text: string;
-  isCorrect: boolean;
-}
+export function ItemPuzzle({ puzzle, onSolve, onClose }: ItemPuzzleProps) {
+  const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
+  const [wrongItem, setWrongItem] = useState<string | null>(null);
 
-// Варианты ответов для каждой задачи
-const PUZZLE_ITEMS: Record<string, ItemOption[]> = {
-  puzzle_03: [
-    { id: 'item_1', text: 'Он был в Александрии', isCorrect: false },
-    { id: 'item_2', text: 'Он был в Каире', isCorrect: true },
-    { id: 'item_3', text: 'Он был в Луксоре', isCorrect: false },
-    { id: 'item_4', text: 'Он был в Асуане', isCorrect: false },
-  ],
-};
-
-export function ItemPuzzle({ puzzle, onSolve }: ItemPuzzleProps) {
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [isSolved, setIsSolved] = useState(false);
-
-  const items = PUZZLE_ITEMS[puzzle.id] ?? [];
-
-  const handleItemClick = (item: ItemOption) => {
-    if (isSolved) return;
-
-    setSelectedItem(item.id);
-
-    if (item.isCorrect) {
-      setIsSolved(true);
-      setTimeout(() => {
-        onSolve();
-      }, 500);
+  const handleSelect = (item: string) => {
+    if (status === 'correct') return;
+    if (item === puzzle.oddItem) {
+      setStatus('correct');
+      onSolve();
+    } else {
+      setWrongItem(item);
+      setStatus('wrong');
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-lg)',
-      }}
-    >
-      {/* Заголовок */}
-      <h2
-        style={{
-          margin: 0,
-          color: 'var(--color-accent)',
-          fontFamily: 'var(--font-main)',
-          fontSize: 'var(--font-size-xl)',
-        }}
-      >
-        🔎 {puzzle.title}
-      </h2>
+    <div style={{ padding: 'var(--spacing-lg)' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: 'var(--spacing-sm)' }}>{puzzle.title}</h2>
+      <p style={{ color: 'var(--color-text)', lineHeight: 1.6, marginBottom: 'var(--spacing-md)' }}>
+        {puzzle.story}
+      </p>
 
-      {/* Описание */}
       <div
         style={{
-          padding: 'var(--spacing-lg)',
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
+          background: 'var(--color-bg-panel)',
           border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: 'var(--spacing-md)',
+          marginBottom: 'var(--spacing-md)',
         }}
       >
-        <p
-          style={{
-            margin: 0,
-            color: 'var(--color-text)',
-            fontSize: 'var(--font-size-md)',
-            lineHeight: 1.7,
-          }}
-        >
-          {puzzle.description}
+        <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+          Место: {puzzle.location}
+        </p>
+        <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+          Время: {puzzle.timePeriod}
         </p>
       </div>
 
-      {/* Подсказка */}
-      {puzzle.hint && !isSolved && (
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            background: 'rgba(201, 168, 76, 0.1)',
-            borderRadius: 'var(--radius-md)',
-            borderLeft: '3px solid var(--color-accent)',
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--color-text-muted)',
-              fontSize: 'var(--font-size-sm)',
-              fontStyle: 'italic',
-            }}
-          >
-            💡 {puzzle.hint}
-          </p>
-        </div>
-      )}
+      <p style={{ color: 'var(--color-text)', marginBottom: 'var(--spacing-md)' }}>{puzzle.task}</p>
 
-      {/* Карточки с вариантами */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 'var(--spacing-md)',
-        }}
-      >
-        {items.map((item) => {
-          const isSelected = selectedItem === item.id;
-          const isCorrect = isSolved && item.isCorrect;
-          const isWrong = isSelected && !isSolved && !item.isCorrect;
-
-          return (
+      <ol style={{ paddingLeft: 'var(--spacing-lg)', margin: 0 }}>
+        {puzzle.items.map((item) => (
+          <li key={item} style={{ marginBottom: 'var(--spacing-sm)' }}>
             <button
-              key={item.id}
-              onClick={() => handleItemClick(item)}
-              disabled={isSolved}
+              onClick={() => handleSelect(item)}
+              disabled={status === 'correct'}
               style={{
-                padding: 'var(--spacing-lg)',
-                background: isCorrect
-                  ? 'rgba(50, 168, 82, 0.2)'
-                  : isWrong
-                  ? 'rgba(168, 50, 50, 0.2)'
-                  : 'var(--color-bg-panel)',
-                border: `2px solid ${
-                  isCorrect ? 'var(--color-success)' : isWrong ? 'var(--color-danger)' : 'var(--color-border)'
-                }`,
-                borderRadius: 'var(--radius-lg)',
+                width: '100%',
+                textAlign: 'left',
+                padding: 'var(--spacing-md)',
+                background: wrongItem === item ? 'var(--color-bg-panel)' : 'var(--color-bg-panel)',
+                border:
+                  wrongItem === item
+                    ? '1px solid var(--color-accent)'
+                    : '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
                 color: 'var(--color-text)',
-                fontSize: 'var(--font-size-md)',
-                textAlign: 'center',
-                cursor: isSolved ? 'default' : 'pointer',
-                minHeight: '80px',
-                transition: 'all var(--transition-fast)',
+                fontSize: '1rem',
+                cursor: status === 'correct' ? 'default' : 'pointer',
               }}
             >
-              {item.text}
+              {item}
             </button>
-          );
-        })}
-      </div>
+          </li>
+        ))}
+      </ol>
 
-      {/* Объяснение */}
-      {isSolved && (
-        <div
-          style={{
-            padding: 'var(--spacing-lg)',
-            background: 'rgba(50, 168, 82, 0.1)',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--color-success)',
-          }}
-        >
-          <h3
+      {status === 'wrong' && (
+        <p style={{ color: 'var(--color-accent)', marginTop: 'var(--spacing-md)', textAlign: 'center' }}>
+          Этот предмет здесь уместен. Подумайте ещё.
+        </p>
+      )}
+
+      {status === 'correct' && (
+        <div style={{ marginTop: 'var(--spacing-lg)' }}>
+          <p style={{ color: 'var(--color-text)', lineHeight: 1.6 }}>{puzzle.explanation}</p>
+          <button
+            onClick={onClose}
             style={{
-              margin: '0 0 var(--spacing-sm)',
-              color: 'var(--color-success)',
-              fontSize: 'var(--font-size-md)',
-            }}
-          >
-            ✓ Верно!
-          </h3>
-          <p
-            style={{
-              margin: 0,
+              width: '100%',
+              marginTop: 'var(--spacing-md)',
+              padding: 'var(--spacing-md)',
+              background: 'transparent',
               color: 'var(--color-text)',
-              fontSize: 'var(--font-size-sm)',
-              lineHeight: 1.6,
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '1rem',
+              cursor: 'pointer',
             }}
           >
-            {puzzle.explanation}
-          </p>
+            К депешам
+          </button>
         </div>
       )}
     </div>
