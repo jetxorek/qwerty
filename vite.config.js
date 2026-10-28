@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from 'vitest/config';
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -11,5 +11,10 @@ export default defineConfig({
     hmr: {
       port: 3000,
     },
+  },
+  test: {
+    environment: 'happy-dom',
+    globals: false,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 });
