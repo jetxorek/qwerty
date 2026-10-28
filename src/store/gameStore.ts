@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { GameState, NotebookView, Overlay, Screen } from './types';
 import type { Note } from '../schemas/note';
+import type { PlayerConnection } from '../schemas/connection';
 import { DEMO_SCENE } from '../data/scene';
 import { findNoteInMatrix } from '../data/noteMatrix';
 
@@ -16,6 +17,7 @@ function makeInitialData() {
     overlay: 'none' as Overlay,
     notes: [] as Note[],
     notebookView: 'categories' as NotebookView,
+    connections: [] as PlayerConnection[],
   };
 }
 
@@ -148,6 +150,32 @@ export const useGameStore = create<GameState>()(
       setNotebookView: (view: NotebookView) => {
         set({ notebookView: view });
       },
+
+      addConnection: (from: string, to: string, type: PlayerConnection['type']) => {
+        // from !== to
+        if (from === to) return;
+        const existing = get().connections;
+        // Проверка на дубликат (в обе стороны)
+        const isDuplicate = existing.some(
+          (c) =>
+            (c.from === from && c.to === to) ||
+            (c.from === to && c.to === from)
+        );
+        if (isDuplicate) return;
+
+        const newConnection: PlayerConnection = {
+          id: `conn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          from,
+          to,
+          type,
+        };
+        set({ connections: [...existing, newConnection] });
+      },
+
+      removeConnection: (id: string) => {
+        const connections = get().connections.filter((c) => c.id !== id);
+        set({ connections });
+      },
     }),
     {
       name: 'nile-game-storage',
@@ -156,6 +184,7 @@ export const useGameStore = create<GameState>()(
         currentSceneId: state.currentSceneId,
         currentNodeIndex: state.currentNodeIndex,
         notes: state.notes,
+        connections: state.connections,
       }),
     }
   )

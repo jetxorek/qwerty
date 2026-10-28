@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useGameStore } from '../store';
 import { TextPanel } from '../components/TextPanel';
 import { CharacterBar } from '../components/CharacterBar';
-import { CharacterCardOverlay } from '../components/overlays/CharacterCardOverlay';
-import { NotebookOverlay } from '../components/overlays/NotebookOverlay';
+import { ActionBar } from '../components/ActionBar';
+import { Overlays } from '../components/Overlays';
 import { DEMO_SCENE } from '../data/scene';
 
 export function SceneScreen() {
@@ -11,8 +11,6 @@ export function SceneScreen() {
   const currentSceneId = useGameStore((s) => s.currentSceneId);
   const currentNodeIndex = useGameStore((s) => s.currentNodeIndex);
   const setCurrentSceneId = useGameStore((s) => s.setCurrentSceneId);
-  const overlay = useGameStore((s) => s.overlay);
-  const setOverlay = useGameStore((s) => s.setOverlay);
 
   // Инициализация сцены
   useEffect(() => {
@@ -105,20 +103,7 @@ export function SceneScreen() {
           {scene.title}
         </h1>
 
-        <button
-          onClick={() => setOverlay('notebook')}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text)',
-            padding: 'var(--spacing-xs) var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--font-size-sm)',
-          }}
-          aria-label="Блокнот"
-        >
-          📓
-        </button>
+        <div style={{ width: '80px' }} />
       </div>
 
       {/* Контент */}
@@ -142,9 +127,11 @@ export function SceneScreen() {
       {/* Панель персонажей */}
       <CharacterBar />
 
+      {/* ActionBar (Блокнот, Схема) */}
+      <ActionBar />
+
       {/* Оверлеи */}
-      {overlay === 'character_card' && <CharacterCardOverlay />}
-      {overlay === 'notebook' && <NotebookOverlay />}
+      <Overlays />
     </div>
   );
 }
