@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { GameState, Overlay, Screen } from './types';
+import type { GameState, NotebookView, Overlay, Screen } from './types';
+import type { Note } from '../schemas/note';
 import { DEMO_SCENE } from '../data/scene';
+import { findNoteInMatrix } from '../data/noteMatrix';
 
 function makeInitialData() {
   return {
@@ -12,7 +14,15 @@ function makeInitialData() {
     currentNodeIndex: 0,
     activeSpeaker: null as string | null,
     overlay: 'none' as Overlay,
+    notes: [] as Note[],
+    notebookView: 'categories' as NotebookView,
   };
+}
+
+let noteCounter = 0;
+function generateNoteId(): string {
+  noteCounter += 1;
+  return `note_${Date.now()}_${noteCounter}`;
 }
 
 export const useGameStore = create<GameState>()(
@@ -63,6 +73,81 @@ export const useGameStore = create<GameState>()(
       setOverlay: (overlay: Overlay) => {
         set({ overlay });
       },
+
+      addNoteFromSelection: (text: string) => {
+        const existing = get().notes;
+        // Проверяем, нет ли уже такой заметки
+        if (existing.some((n) => n.text === text)) {
+          return;
+        }
+
+        const matrixEntry = findNoteInMatrix(text);
+        let newNote: Note;
+
+        if (matrixEntry) {
+          // Нашли в матрице — добавляем как улику
+          newNote = {
+            ...matrixEntry,
+            isPersonal: false,
+            important: false,
+            discarded: false,
+          };
+        } else {
+          // Не нашли — личная заметка
+          newNote = {
+            id: generateNoteId(),
+            text,
+            statement: text,
+            category: 'other',
+            target: null,
+            isPersonal: true,
+            important: false,
+            discarded: false,
+            truth: 'plausible',
+          };
+        }
+
+        set({ notes: [...existing, newNote] });
+      },
+
+      addPersonalNote: (text: string) => {
+        const existing = get().notes;
+        const newNote: Note = {
+          id: generateNoteId(),
+          text,
+          statement: text,
+          category: 'other',
+          target: null,
+          isPersonal: true,
+          important: false,
+          discarded: false,
+          truth: 'plausible',
+        };
+        set({ notes: [...existing, newNote] });
+      },
+
+      toggleNoteImportant: (id: string) => {
+        const notes = get().notes.map((n) =>
+          n.id === id ? { ...n, important: !n.important } : n
+        );
+        set({ notes });
+      },
+
+      toggleNoteDiscarded: (id: string) => {
+        const notes = get().notes.map((n) =>
+          n.id === id ? { ...n, discarded: !n.discarded } : n
+        );
+        set({ notes });
+      },
+
+      removeNote: (id: string) => {
+        const notes = get().notes.filter((n) => n.id !== id);
+        set({ notes });
+      },
+
+      setNotebookView: (view: NotebookView) => {
+        set({ notebookView: view });
+      },
     }),
     {
       name: 'nile-game-storage',
@@ -70,6 +155,7 @@ export const useGameStore = create<GameState>()(
         tutorialStepsSeen: state.tutorialStepsSeen,
         currentSceneId: state.currentSceneId,
         currentNodeIndex: state.currentNodeIndex,
+        notes: state.notes,
       }),
     }
   )

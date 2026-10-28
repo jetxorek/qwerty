@@ -1,5 +1,5 @@
-import { useGameStore } from '../store';
-import { getCharacterById } from '../data/characters';
+import { useGameStore } from '../../store';
+import { getCharacterById } from '../../data/characters';
 
 export function CharacterCardOverlay() {
   const activeSpeaker = useGameStore((s) => s.activeSpeaker);
@@ -11,6 +11,12 @@ export function CharacterCardOverlay() {
 
   const handleClose = () => {
     setOverlay('none');
+  };
+
+  const roleLabels: Record<string, string> = {
+    detective: '🔍 Детектив',
+    suspect: '🎭 Подозреваемый',
+    victim: '💀 Жертва',
   };
 
   return (
@@ -119,6 +125,34 @@ export function CharacterCardOverlay() {
               }}
             >
               {character.visibleFacts.age} лет
+            </p>
+          </div>
+
+          <div
+            style={{
+              padding: 'var(--spacing-md)',
+              background: 'var(--color-bg-elevated)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <span
+              style={{
+                color: 'var(--color-text-muted)',
+                fontSize: 'var(--font-size-xs)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+              }}
+            >
+              Роль
+            </span>
+            <p
+              style={{
+                margin: '4px 0 0',
+                color: 'var(--color-text)',
+                fontSize: 'var(--font-size-md)',
+              }}
+            >
+              {roleLabels[character.role]}
             </p>
           </div>
 

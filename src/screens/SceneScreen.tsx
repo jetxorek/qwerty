@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useGameStore } from '../store';
 import { TextPanel } from '../components/TextPanel';
 import { CharacterBar } from '../components/CharacterBar';
-import { CharacterCardOverlay } from '../components/CharacterCardOverlay';
+import { CharacterCardOverlay } from '../components/overlays/CharacterCardOverlay';
+import { NotebookOverlay } from '../components/overlays/NotebookOverlay';
 import { DEMO_SCENE } from '../data/scene';
 
 export function SceneScreen() {
@@ -141,8 +142,9 @@ export function SceneScreen() {
       {/* Панель персонажей */}
       <CharacterBar />
 
-      {/* Оверлей карточки персонажа */}
+      {/* Оверлеи */}
       {overlay === 'character_card' && <CharacterCardOverlay />}
+      {overlay === 'notebook' && <NotebookOverlay />}
     </div>
   );
 }

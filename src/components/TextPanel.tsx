@@ -12,6 +12,7 @@ interface TextPanelProps {
 export function TextPanel({ speakerId, text, isLastNode }: TextPanelProps) {
   const advanceNode = useGameStore((s) => s.advanceNode);
   const setScreen = useGameStore((s) => s.setScreen);
+  const addNoteFromSelection = useGameStore((s) => s.addNoteFromSelection);
   const [selection, setSelection] = useState<string | null>(null);
   const [selectionPos, setSelectionPos] = useState<{ x: number; y: number } | null>(null);
 
@@ -31,11 +32,13 @@ export function TextPanel({ speakerId, text, isLastNode }: TextPanelProps) {
   }, []);
 
   const handleAddToNotebook = useCallback(() => {
-    // Заглушка — логика добавления будет в P3b
+    if (selection) {
+      addNoteFromSelection(selection);
+    }
     setSelection(null);
     setSelectionPos(null);
     window.getSelection()?.removeAllRanges();
-  }, []);
+  }, [selection, addNoteFromSelection]);
 
   const handleDismissSelection = useCallback(() => {
     setSelection(null);
