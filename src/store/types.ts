@@ -7,6 +7,22 @@ export type Screen =
   | 'settings'
   | 'how_to_play';
 
+export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence';
+
+export interface SceneNode {
+  id: string;
+  speakerId?: string;
+  text: string;
+  nextNodeId?: string;
+}
+
+export interface Scene {
+  id: string;
+  title: string;
+  backgroundId?: string;
+  nodes: SceneNode[];
+}
+
 export interface GameState {
   // Навигация
   currentScreen: Screen;
@@ -20,4 +36,19 @@ export interface GameState {
   // Контекст туториала
   tutorialContext: string | null;
   setTutorialContext: (context: string | null) => void;
+
+  // Сцена
+  currentSceneId: string | null;
+  setCurrentSceneId: (id: string | null) => void;
+  currentNodeIndex: number;
+  setCurrentNodeIndex: (index: number) => void;
+  advanceNode: () => void;
+
+  // Активный спикер (для карточки персонажа)
+  activeSpeaker: string | null;
+  setActiveSpeaker: (id: string | null) => void;
+
+  // Оверлеи
+  overlay: Overlay;
+  setOverlay: (overlay: Overlay) => void;
 }
