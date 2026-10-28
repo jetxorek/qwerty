@@ -4,6 +4,7 @@ import { TextPanel } from '../components/TextPanel';
 import { CharacterBar } from '../components/CharacterBar';
 import { ActionBar } from '../components/ActionBar';
 import { Overlays } from '../components/Overlays';
+import { AppHeader } from '../components/AppHeader';
 import { DEMO_SCENE } from '../data/scene';
 
 export function SceneScreen() {
@@ -62,49 +63,7 @@ export function SceneScreen() {
         }}
       />
 
-      {/* Верхняя панель */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'var(--spacing-md) var(--spacing-lg)',
-          background: 'rgba(10, 10, 15, 0.8)',
-          borderBottom: '1px solid var(--color-border)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <button
-          onClick={() => setScreen('main_menu')}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text)',
-            padding: 'var(--spacing-xs) var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--font-size-sm)',
-          }}
-        >
-          ☰ Меню
-        </button>
-
-        <h1
-          style={{
-            margin: 0,
-            color: 'var(--color-accent)',
-            fontFamily: 'var(--font-main)',
-            fontSize: 'var(--font-size-md)',
-            textAlign: 'center',
-            flex: 1,
-          }}
-        >
-          {scene.title}
-        </h1>
-
-        <div style={{ width: '80px' }} />
-      </div>
+      <AppHeader title={scene.title} showBack />
 
       {/* Контент */}
       <div

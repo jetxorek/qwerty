@@ -6,6 +6,7 @@ import { SecretPuzzle } from '../components/daily/SecretPuzzle';
 import { CipherPuzzle } from '../components/daily/CipherPuzzle';
 import { ItemPuzzle } from '../components/daily/ItemPuzzle';
 import { HowToPlayDailyOverlay } from '../components/overlays/HowToPlayDailyOverlay';
+import { AppHeader } from '../components/AppHeader';
 
 const STORAGE_KEY = 'mfe_daily_solved_date';
 
@@ -24,51 +25,6 @@ function markSolvedToday(): void {
 }
 
 type PuzzleType = 'cipher' | 'item' | 'secret';
-
-function DailyHeader({ onShowRules }: { onShowRules: () => void }) {
-  const setScreen = useGameStore((s) => s.setScreen);
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 'var(--spacing-md)',
-        borderBottom: '1px solid var(--color-border)',
-        background: 'rgba(10, 10, 15, 0.8)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <button
-        onClick={() => setScreen('main_menu')}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          color: 'var(--color-accent)',
-          fontSize: '1rem',
-          cursor: 'pointer',
-          padding: 'var(--spacing-sm)',
-        }}
-      >
-        ← Назад в меню
-      </button>
-      <button
-        onClick={onShowRules}
-        style={{
-          background: 'transparent',
-          border: '1px solid var(--color-border)',
-          color: 'var(--color-text)',
-          padding: 'var(--spacing-sm) var(--spacing-md)',
-          borderRadius: 'var(--radius-md)',
-          fontSize: 'var(--font-size-md)',
-        }}
-      >
-        ❓
-      </button>
-    </div>
-  );
-}
 
 export function DailyPuzzleScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
@@ -112,7 +68,7 @@ export function DailyPuzzleScreen() {
           background: 'var(--color-bg)',
         }}
       >
-        <DailyHeader onShowRules={() => setShowHowToPlay(true)} />
+        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
 
         <div
           style={{
@@ -195,7 +151,7 @@ export function DailyPuzzleScreen() {
           background: 'var(--color-bg)',
         }}
       >
-        <DailyHeader onShowRules={() => setShowHowToPlay(true)} />
+        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
 
         <div
           style={{
@@ -301,7 +257,7 @@ export function DailyPuzzleScreen() {
           background: 'var(--color-bg)',
         }}
       >
-        <DailyHeader onShowRules={() => setShowHowToPlay(true)} />
+        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
 
         <div
           style={{
@@ -410,7 +366,7 @@ export function DailyPuzzleScreen() {
           background: 'var(--color-bg)',
         }}
       >
-        <DailyHeader onShowRules={() => setShowHowToPlay(true)} />
+        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
         <div
           style={{
             flex: 1,
@@ -435,7 +391,7 @@ export function DailyPuzzleScreen() {
         background: 'var(--color-bg)',
       }}
     >
-      <DailyHeader onShowRules={() => setShowHowToPlay(true)} />
+      <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
 
       <div
         style={{

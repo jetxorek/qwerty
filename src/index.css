@@ -65,8 +65,9 @@ html, body {
   max-width: 600px;
   margin: 0 auto;
   min-height: 100vh;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
   background: var(--color-bg);
+  position: relative;
 }
 
 button {
