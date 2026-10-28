@@ -89,7 +89,7 @@ export function MainMenuScreen() {
           letterSpacing: '0.05em',
         }}
       >
-        Смерть на Ниле
+        Детективные истории
       </h1>
 
       <div
