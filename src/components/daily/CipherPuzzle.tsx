@@ -1,234 +1,119 @@
 import { useState } from 'react';
-import type { DailyPuzzle } from '../../schemas/dailyPuzzle';
+import type { CipherPuzzle as CipherPuzzleType } from '../../schemas/dailyPuzzle';
 
 interface CipherPuzzleProps {
-  puzzle: DailyPuzzle;
+  puzzle: CipherPuzzleType;
   onSolve: () => void;
+  onClose: () => void;
 }
 
-// Cipher text для каждой задачи
-const CIPHER_TEXTS: Record<string, string> = {
-  puzzle_02: '. --. .. .--. . -',
-};
-
-export function CipherPuzzle({ puzzle, onSolve }: CipherPuzzleProps) {
-  const [userAnswer, setUserAnswer] = useState('');
-  const [isSolved, setIsSolved] = useState(false);
-  const [showError, setShowError] = useState(false);
-
-  const cipherText = CIPHER_TEXTS[puzzle.id] ?? '';
-  const correctAnswer = puzzle.answer;
-
-  const normalizeAnswer = (str: string): string => {
-    return str.trim().toLowerCase().replace(/\s+/g, '');
-  };
+export function CipherPuzzle({ puzzle, onSolve, onClose }: CipherPuzzleProps) {
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
   const handleCheck = () => {
-    if (isSolved) return;
-
-    const normalizedUser = normalizeAnswer(userAnswer);
-    const normalizedCorrect = normalizeAnswer(correctAnswer);
-
-    if (normalizedUser === normalizedCorrect) {
-      setIsSolved(true);
-      setShowError(false);
-      setTimeout(() => {
-        onSolve();
-      }, 500);
+    if (status === 'correct') return;
+    const normalized = input.trim().toUpperCase();
+    const expected = puzzle.correctAnswer.trim().toUpperCase();
+    if (normalized === expected) {
+      setStatus('correct');
+      onSolve();
     } else {
-      setShowError(true);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleCheck();
+      setStatus('wrong');
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-lg)',
-      }}
-    >
-      {/* Заголовок */}
-      <h2
-        style={{
-          margin: 0,
-          color: 'var(--color-accent)',
-          fontFamily: 'var(--font-main)',
-          fontSize: 'var(--font-size-xl)',
-        }}
-      >
-        🔐 {puzzle.title}
-      </h2>
+    <div style={{ padding: 'var(--spacing-lg)' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: 'var(--spacing-sm)' }}>{puzzle.title}</h2>
+      <p style={{ color: 'var(--color-text)', lineHeight: 1.6, marginBottom: 'var(--spacing-lg)' }}>
+        {puzzle.story}
+      </p>
 
-      {/* Описание */}
-      <div
+      <pre
         style={{
-          padding: 'var(--spacing-lg)',
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
+          background: 'var(--color-bg-panel)',
           border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: 'var(--spacing-lg)',
+          fontSize: '1.3rem',
+          letterSpacing: '0.15em',
+          textAlign: 'center',
+          marginBottom: 'var(--spacing-sm)',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
         }}
       >
-        <p
-          style={{
-            margin: '0 0 var(--spacing-md)',
-            color: 'var(--color-text)',
-            fontSize: 'var(--font-size-md)',
-            lineHeight: 1.7,
-          }}
-        >
-          {puzzle.description}
+        {puzzle.cipherText}
+      </pre>
+
+      {puzzle.hint && (
+        <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginBottom: 'var(--spacing-md)' }}>
+          {puzzle.hint}
         </p>
+      )}
 
-        {/* Шифр */}
-        {cipherText && (
-          <div
-            style={{
-              padding: 'var(--spacing-lg)',
-              background: 'var(--color-bg)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              textAlign: 'center',
-            }}
-          >
-            <code
-              style={{
-                fontFamily: 'monospace',
-                fontSize: 'var(--font-size-xl)',
-                color: 'var(--color-accent)',
-                letterSpacing: '0.2em',
-                wordBreak: 'break-all',
-              }}
-            >
-              {cipherText}
-            </code>
-          </div>
-        )}
-      </div>
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={status === 'correct'}
+        placeholder="Введите ответ"
+        style={{
+          width: '100%',
+          padding: 'var(--spacing-md)',
+          background: 'var(--color-bg-panel)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--color-text)',
+          fontSize: '1rem',
+          marginBottom: 'var(--spacing-md)',
+        }}
+      />
 
-      {/* Подсказка */}
-      {puzzle.hint && !isSolved && (
-        <div
+      {status !== 'correct' && (
+        <button
+          onClick={handleCheck}
           style={{
+            width: '100%',
             padding: 'var(--spacing-md)',
-            background: 'rgba(201, 168, 76, 0.1)',
+            background: 'var(--color-accent)',
+            color: 'var(--color-bg)',
+            border: 'none',
             borderRadius: 'var(--radius-md)',
-            borderLeft: '3px solid var(--color-accent)',
+            fontSize: '1rem',
+            cursor: 'pointer',
           }}
         >
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--color-text-muted)',
-              fontSize: 'var(--font-size-sm)',
-              fontStyle: 'italic',
-            }}
-          >
-            💡 {puzzle.hint}
-          </p>
-        </div>
+          Проверить
+        </button>
       )}
 
-      {/* Поле ввода */}
-      {!isSolved && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-md)',
-          }}
-        >
-          <input
-            type="text"
-            value={userAnswer}
-            onChange={(e) => {
-              setUserAnswer(e.target.value);
-              setShowError(false);
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder="Введите ответ..."
-            disabled={isSolved}
-            style={{
-              padding: 'var(--spacing-lg)',
-              background: 'var(--color-bg-panel)',
-              border: `2px solid ${showError ? 'var(--color-danger)' : 'var(--color-border)'}`,
-              borderRadius: 'var(--radius-lg)',
-              color: 'var(--color-text)',
-              fontSize: 'var(--font-size-lg)',
-              fontFamily: 'inherit',
-              minHeight: '56px',
-            }}
-          />
+      {status === 'wrong' && (
+        <p style={{ color: 'var(--color-accent)', marginTop: 'var(--spacing-md)', textAlign: 'center' }}>
+          Неверно. Попробуйте ещё раз.
+        </p>
+      )}
 
-          {showError && (
-            <p
-              style={{
-                margin: 0,
-                color: 'var(--color-danger)',
-                fontSize: 'var(--font-size-sm)',
-                textAlign: 'center',
-              }}
-            >
-              Неверно. Попробуйте ещё раз.
-            </p>
-          )}
-
+      {status === 'correct' && (
+        <div style={{ marginTop: 'var(--spacing-lg)' }}>
+          <p style={{ color: 'var(--color-text)', lineHeight: 1.6 }}>{puzzle.explanation}</p>
           <button
-            onClick={handleCheck}
-            disabled={!userAnswer.trim()}
+            onClick={onClose}
             style={{
-              padding: 'var(--spacing-lg)',
-              background: userAnswer.trim() ? 'var(--color-accent)' : 'var(--color-bg-elevated)',
-              color: userAnswer.trim() ? 'var(--color-bg)' : 'var(--color-text-muted)',
-              border: 'none',
-              borderRadius: 'var(--radius-lg)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'bold',
-              fontFamily: 'var(--font-main)',
-              minHeight: '56px',
-              cursor: userAnswer.trim() ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Проверить
-          </button>
-        </div>
-      )}
-
-      {/* Объяснение */}
-      {isSolved && (
-        <div
-          style={{
-            padding: 'var(--spacing-lg)',
-            background: 'rgba(50, 168, 82, 0.1)',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--color-success)',
-          }}
-        >
-          <h3
-            style={{
-              margin: '0 0 var(--spacing-sm)',
-              color: 'var(--color-success)',
-              fontSize: 'var(--font-size-md)',
-            }}
-          >
-            ✓ Верно!
-          </h3>
-          <p
-            style={{
-              margin: 0,
+              width: '100%',
+              marginTop: 'var(--spacing-md)',
+              padding: 'var(--spacing-md)',
+              background: 'transparent',
               color: 'var(--color-text)',
-              fontSize: 'var(--font-size-sm)',
-              lineHeight: 1.6,
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '1rem',
+              cursor: 'pointer',
             }}
           >
-            {puzzle.explanation}
-          </p>
+            К депешам
+          </button>
         </div>
       )}
     </div>

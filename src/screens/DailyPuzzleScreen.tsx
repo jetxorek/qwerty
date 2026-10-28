@@ -1,418 +1,142 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useGameStore } from '../store';
 import { DAILY_PUZZLES } from '../data/dailyPuzzles';
-import type { DailyPuzzle } from '../schemas/dailyPuzzle';
-import { SecretPuzzle } from '../components/daily/SecretPuzzle';
+import { AppHeader } from '../components/AppHeader';
 import { CipherPuzzle } from '../components/daily/CipherPuzzle';
 import { ItemPuzzle } from '../components/daily/ItemPuzzle';
+import { SecretPuzzle } from '../components/daily/SecretPuzzle';
 import { HowToPlayDailyOverlay } from '../components/overlays/HowToPlayDailyOverlay';
-import { AppHeader } from '../components/AppHeader';
-
-const STORAGE_KEY = 'mfe_daily_solved_date';
-
-function getTodayDate(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-}
-
-function isSolvedToday(): boolean {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === getTodayDate();
-}
-
-function markSolvedToday(): void {
-  localStorage.setItem(STORAGE_KEY, getTodayDate());
-}
-
-type PuzzleType = 'cipher' | 'item' | 'secret';
 
 export function DailyPuzzleScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
-  const [selectedType, setSelectedType] = useState<PuzzleType | null>(null);
-  const [isSolved, setIsSolved] = useState(false);
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
-  const [alreadySolved, setAlreadySolved] = useState(false);
+  const [showRules, setShowRules] = useState(false);
+  const [selectedType, setSelectedType] = useState<'cipher' | 'item' | 'secret' | null>(null);
 
-  useEffect(() => {
-    if (isSolvedToday()) {
-      setAlreadySolved(true);
-    }
-  }, []);
+  const today = new Date().toDateString();
+  const solvedDate = localStorage.getItem('mfe_daily_solved_date');
+  const isSolvedToday = solvedDate === today;
 
   const handleSolve = () => {
-    markSolvedToday();
-    setIsSolved(true);
+    localStorage.setItem('mfe_daily_solved_date', today);
   };
 
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText('Я раскрыл дело в Смерти на Ниле!');
-      alert('Текст скопирован в буфер обмена!');
-    } catch {
-      alert('Не удалось скопировать текст');
+  const handleClose = () => {
+    setSelectedType(null);
+  };
+
+  const renderContent = () => {
+    if (isSolvedToday && !selectedType) {
+      return (
+        <div style={{ padding: 'var(--spacing-lg)', textAlign: 'center' }}>
+          <h2>На сегодня все дела закрыты.</h2>
+          <p style={{ color: 'var(--color-text-muted)' }}>Возвращайтесь завтра!</p>
+          <button
+            onClick={() => setScreen('main_menu')}
+            style={{
+              marginTop: 'var(--spacing-lg)',
+              padding: 'var(--spacing-md)',
+              background: 'var(--color-accent)',
+              color: 'var(--color-bg)',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              cursor: 'pointer',
+            }}
+          >
+            В меню
+          </button>
+        </div>
+      );
     }
+
+    if (selectedType) {
+      const puzzle = DAILY_PUZZLES.find((p) => p.type === selectedType);
+      if (!puzzle) return null;
+
+      if (puzzle.type === 'cipher') {
+        return <CipherPuzzle puzzle={puzzle} onSolve={handleSolve} onClose={handleClose} />;
+      }
+      if (puzzle.type === 'item') {
+        return <ItemPuzzle puzzle={puzzle} onSolve={handleSolve} onClose={handleClose} />;
+      }
+      if (puzzle.type === 'secret') {
+        return <SecretPuzzle puzzle={puzzle} onSolve={handleSolve} onClose={handleClose} />;
+      }
+    }
+
+    return (
+      <div style={{ padding: 'var(--spacing-lg)' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 'var(--spacing-sm)' }}>Выберите депешу</h2>
+        <p
+          style={{
+            textAlign: 'center',
+            color: 'var(--color-text-muted)',
+            marginBottom: 'var(--spacing-lg)',
+          }}
+        >
+          Каждый день новые дела
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <button
+            onClick={() => setSelectedType('cipher')}
+            style={{
+              padding: 'var(--spacing-lg)',
+              border: '1px solid var(--color-accent)',
+              background: 'var(--color-bg-panel)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-text)',
+              cursor: 'pointer',
+            }}
+          >
+            <h3 style={{ margin: 0 }}>📜 Шифр дня</h3>
+          </button>
+          <button
+            onClick={() => setSelectedType('item')}
+            style={{
+              padding: 'var(--spacing-lg)',
+              border: '1px solid var(--color-border)',
+              background: 'var(--color-bg-panel)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-text)',
+              cursor: 'pointer',
+            }}
+          >
+            <h3 style={{ margin: 0 }}>🕵️ Вещдок дня</h3>
+          </button>
+          <button
+            onClick={() => setSelectedType('secret')}
+            style={{
+              padding: 'var(--spacing-lg)',
+              border: '1px solid var(--color-border)',
+              background: 'var(--color-bg-panel)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--color-text)',
+              cursor: 'pointer',
+            }}
+          >
+            <h3 style={{ margin: 0 }}>📰 Секрет дня</h3>
+          </button>
+        </div>
+      </div>
+    );
   };
-
-  const getPuzzleByType = (type: PuzzleType): DailyPuzzle | undefined => {
-    return DAILY_PUZZLES.find((p) => p.type === type);
-  };
-
-  // Уже решено сегодня
-  if (alreadySolved) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          background: 'var(--color-bg)',
-        }}
-      >
-        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
-
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 'var(--spacing-lg)',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '500px',
-              width: '100%',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '4rem',
-                marginBottom: 'var(--spacing-lg)',
-              }}
-            >
-              ✓
-            </div>
-            <h1
-              style={{
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-main)',
-                fontSize: 'var(--font-size-2xl)',
-                marginBottom: 'var(--spacing-md)',
-              }}
-            >
-              На сегодня все дела закрыты
-            </h1>
-            <p
-              style={{
-                color: 'var(--color-text-muted)',
-                fontSize: 'var(--font-size-md)',
-                marginBottom: 'var(--spacing-xl)',
-                lineHeight: 1.6,
-              }}
-            >
-              Возвращайтесь завтра за новыми заданиями от Скотленд-Ярда!
-            </p>
-            <button
-              onClick={() => setScreen('main_menu')}
-              style={{
-                padding: 'var(--spacing-lg)',
-                background: 'var(--color-accent)',
-                color: 'var(--color-bg)',
-                border: 'none',
-                borderRadius: 'var(--radius-lg)',
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'bold',
-                fontFamily: 'var(--font-main)',
-                minHeight: '56px',
-                width: '100%',
-              }}
-            >
-              В меню
-            </button>
-          </div>
-        </div>
-
-        {showHowToPlay && <HowToPlayDailyOverlay onClose={() => setShowHowToPlay(false)} />}
-      </div>
-    );
-  }
-
-  // Решено только что
-  if (isSolved) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          background: 'var(--color-bg)',
-        }}
-      >
-        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
-
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 'var(--spacing-lg)',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '500px',
-              width: '100%',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '4rem',
-                marginBottom: 'var(--spacing-lg)',
-              }}
-            >
-              🎉
-            </div>
-            <h1
-              style={{
-                color: 'var(--color-success)',
-                fontFamily: 'var(--font-main)',
-                fontSize: 'var(--font-size-2xl)',
-                marginBottom: 'var(--spacing-md)',
-              }}
-            >
-              Дело раскрыто!
-            </h1>
-            <p
-              style={{
-                color: 'var(--color-text-muted)',
-                fontSize: 'var(--font-size-md)',
-                marginBottom: 'var(--spacing-xl)',
-                lineHeight: 1.6,
-              }}
-            >
-              Отличная работа, детектив! Возвращайтесь завтра за новыми заданиями.
-            </p>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-md)',
-              }}
-            >
-              <button
-                onClick={handleShare}
-                style={{
-                  padding: 'var(--spacing-lg)',
-                  background: 'var(--color-bg-panel)',
-                  color: 'var(--color-accent)',
-                  border: '2px solid var(--color-accent)',
-                  borderRadius: 'var(--radius-lg)',
-                  fontSize: 'var(--font-size-lg)',
-                  fontWeight: 'bold',
-                  fontFamily: 'var(--font-main)',
-                  minHeight: '56px',
-                }}
-              >
-                📤 Поделиться
-              </button>
-              <button
-                onClick={() => setScreen('main_menu')}
-                style={{
-                  padding: 'var(--spacing-lg)',
-                  background: 'var(--color-accent)',
-                  color: 'var(--color-bg)',
-                  border: 'none',
-                  borderRadius: 'var(--radius-lg)',
-                  fontSize: 'var(--font-size-lg)',
-                  fontWeight: 'bold',
-                  fontFamily: 'var(--font-main)',
-                  minHeight: '56px',
-                }}
-              >
-                В меню
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {showHowToPlay && <HowToPlayDailyOverlay onClose={() => setShowHowToPlay(false)} />}
-      </div>
-    );
-  }
-
-  // Выбор задания
-  if (!selectedType) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          background: 'var(--color-bg)',
-        }}
-      >
-        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
-
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: 'var(--spacing-lg)',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '500px',
-              margin: '0 auto',
-              width: '100%',
-            }}
-          >
-            <h1
-              style={{
-                textAlign: 'center',
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-main)',
-                fontSize: 'var(--font-size-2xl)',
-                marginBottom: 'var(--spacing-xl)',
-              }}
-            >
-              Выберите депешу
-            </h1>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-md)',
-              }}
-            >
-              <button
-                onClick={() => setSelectedType('cipher')}
-                style={{
-                  padding: 'var(--spacing-lg)',
-                  minHeight: '100px',
-                  background: 'var(--color-bg-panel)',
-                  border: '2px solid var(--color-border)',
-                  borderRadius: 'var(--radius-lg)',
-                  color: 'var(--color-text)',
-                  fontSize: 'var(--font-size-lg)',
-                  fontFamily: 'var(--font-main)',
-                  textAlign: 'left',
-                }}
-              >
-                🔐 Шифр дня
-              </button>
-
-              <button
-                onClick={() => setSelectedType('item')}
-                style={{
-                  padding: 'var(--spacing-lg)',
-                  minHeight: '100px',
-                  background: 'var(--color-bg-panel)',
-                  border: '2px solid var(--color-border)',
-                  borderRadius: 'var(--radius-lg)',
-                  color: 'var(--color-text)',
-                  fontSize: 'var(--font-size-lg)',
-                  fontFamily: 'var(--font-main)',
-                  textAlign: 'left',
-                }}
-              >
-                🔎 Вещдок дня
-              </button>
-
-              <button
-                onClick={() => setSelectedType('secret')}
-                style={{
-                  padding: 'var(--spacing-lg)',
-                  minHeight: '100px',
-                  background: 'var(--color-bg-panel)',
-                  border: '2px solid var(--color-border)',
-                  borderRadius: 'var(--radius-lg)',
-                  color: 'var(--color-text)',
-                  fontSize: 'var(--font-size-lg)',
-                  fontFamily: 'var(--font-main)',
-                  textAlign: 'left',
-                }}
-              >
-                📰 Секрет дня
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {showHowToPlay && <HowToPlayDailyOverlay onClose={() => setShowHowToPlay(false)} />}
-      </div>
-    );
-  }
-
-  // Рендер выбранного задания
-  const puzzle = getPuzzleByType(selectedType);
-
-  if (!puzzle) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          background: 'var(--color-bg)',
-        }}
-      >
-        <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 'var(--spacing-lg)',
-          }}
-        >
-          <p style={{ color: 'var(--color-text-muted)' }}>Задание не найдено.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        background: 'var(--color-bg)',
-      }}
-    >
-      <AppHeader showBack rightContent={<button onClick={() => setShowHowToPlay(true)} style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: 'var(--spacing-sm) var(--spacing-md)', borderRadius: 'var(--radius-md)', fontSize: 'var(--font-size-md)' }}>❓</button>} />
-
-      <div
-        style={{
-          flex: 1,
-          padding: 'var(--spacing-lg)',
-          overflowY: 'auto',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '600px',
-            margin: '0 auto',
-          }}
-        >
-          {selectedType === 'secret' && <SecretPuzzle puzzle={puzzle} onSolve={handleSolve} />}
-          {selectedType === 'cipher' && <CipherPuzzle puzzle={puzzle} onSolve={handleSolve} />}
-          {selectedType === 'item' && <ItemPuzzle puzzle={puzzle} onSolve={handleSolve} />}
-        </div>
-      </div>
-
-      {showHowToPlay && <HowToPlayDailyOverlay onClose={() => setShowHowToPlay(false)} />}
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppHeader
+        title="Ежедневные дела"
+        showBack
+        rightContent={
+          <button
+            onClick={() => setShowRules(true)}
+            style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}
+          >
+            ❓
+          </button>
+        }
+      />
+      <div style={{ flex: 1 }}>{renderContent()}</div>
+      {showRules && <HowToPlayDailyOverlay onClose={() => setShowRules(false)} />}
     </div>
   );
 }
