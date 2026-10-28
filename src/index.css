@@ -62,7 +62,11 @@ html, body {
 }
 
 #root {
+  max-width: 600px;
+  margin: 0 auto;
   min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background: var(--color-bg);
 }
 
 button {
