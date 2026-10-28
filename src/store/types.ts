@@ -9,7 +9,9 @@ export type Screen =
   | 'settings'
   | 'how_to_play';
 
-export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence';
+import type { PlayerConnection } from '../schemas/connection';
+
+export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence' | 'character_map';
 
 export type NotebookView = 'categories' | 'characters';
 
@@ -67,4 +69,9 @@ export interface GameState {
   // Вид блокнота
   notebookView: NotebookView;
   setNotebookView: (view: NotebookView) => void;
+
+  // Связи между персонажами
+  connections: PlayerConnection[];
+  addConnection: (from: string, to: string, type: PlayerConnection['type']) => void;
+  removeConnection: (id: string) => void;
 }
