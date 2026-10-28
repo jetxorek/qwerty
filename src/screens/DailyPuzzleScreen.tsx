@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../store';
 import { DAILY_PUZZLES } from '../data/dailyPuzzles';
 import { AppHeader } from '../components/AppHeader';
@@ -6,23 +6,40 @@ import { CipherPuzzle } from '../components/daily/CipherPuzzle';
 import { ItemPuzzle } from '../components/daily/ItemPuzzle';
 import { SecretPuzzle } from '../components/daily/SecretPuzzle';
 import { HowToPlayDailyOverlay } from '../components/overlays/HowToPlayDailyOverlay';
+import { AchievementsOverlay } from '../components/overlays/AchievementsOverlay';
+import { applySolvedPuzzle, evaluateAchievements } from '../engine/achievementEngine';
+import { loadDailyProgress, saveDailyProgress } from '../storage/dailyProgress';
+import type { DailyProgress } from '../schemas/achievement';
+
+type PuzzleType = 'cipher' | 'item' | 'secret';
 
 export function DailyPuzzleScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   const [showRules, setShowRules] = useState(false);
-  const [selectedType, setSelectedType] = useState<'cipher' | 'item' | 'secret' | null>(null);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [progress, setProgress] = useState<DailyProgress>(() => loadDailyProgress());
+  const [selectedType, setSelectedType] = useState<PuzzleType | null>(null);
 
   const today = new Date().toDateString();
   const solvedDate = localStorage.getItem('mfe_daily_solved_date');
   const isSolvedToday = solvedDate === today;
 
+  useEffect(() => {
+    setProgress(loadDailyProgress());
+  }, []);
+
   const handleSolve = () => {
+    if (!selectedType) return;
+    const current = loadDailyProgress();
+    const afterSolve = applySolvedPuzzle(current, selectedType);
+    const unlocked = evaluateAchievements(afterSolve);
+    const next: DailyProgress = { ...afterSolve, unlockedAchievements: unlocked };
+    saveDailyProgress(next);
+    setProgress(next);
     localStorage.setItem('mfe_daily_solved_date', today);
   };
 
-  const handleClose = () => {
-    setSelectedType(null);
-  };
+  const handleClose = () => setSelectedType(null);
 
   const renderContent = () => {
     if (isSolvedToday && !selectedType) {
@@ -127,16 +144,40 @@ export function DailyPuzzleScreen() {
         title="Ежедневные дела"
         showBack
         rightContent={
-          <button
-            onClick={() => setShowRules(true)}
-            style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}
-          >
-            ❓
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+              {progress.score}
+            </span>
+            <button
+              onClick={() => setShowAchievements(true)}
+              aria-label="Ачивки"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+              }}
+            >
+              🏅
+            </button>
+            <button
+              onClick={() => setShowRules(true)}
+              aria-label="Как играть"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                fontSize: '1.2rem',
+                cursor: 'pointer',
+              }}
+            >
+              ❓
+            </button>
+          </div>
         }
       />
       <div style={{ flex: 1 }}>{renderContent()}</div>
       {showRules && <HowToPlayDailyOverlay onClose={() => setShowRules(false)} />}
+      {showAchievements && <AchievementsOverlay onClose={() => setShowAchievements(false)} />}
     </div>
   );
 }
