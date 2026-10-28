@@ -3,6 +3,7 @@ import { useGameStore } from '../store';
 import type { CaseDraft, CaseCharacter, KeyEvidence } from '../schemas/caseDraft';
 import { validateCaseDraft } from '../engine/caseValidator';
 import { HowToPlayBuilderOverlay } from '../components/overlays/HowToPlayBuilderOverlay';
+import { AppHeader } from '../components/AppHeader';
 
 const STORAGE_KEY = 'mfe_custom_case_draft';
 
@@ -96,60 +97,25 @@ export function CaseBuilderScreen() {
         position: 'relative',
       }}
     >
-      {/* Хедер */}
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'var(--spacing-md) var(--spacing-lg)',
-          background: 'rgba(10, 10, 15, 0.9)',
-          borderBottom: '1px solid var(--color-border)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <button
-          onClick={() => setScreen('main_menu')}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text)',
-            padding: 'var(--spacing-sm) var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--font-size-sm)',
-          }}
-        >
-          ← Назад
-        </button>
-
-        <h1
-          style={{
-            margin: 0,
-            color: 'var(--color-accent)',
-            fontFamily: 'var(--font-main)',
-            fontSize: 'var(--font-size-lg)',
-          }}
-        >
-          Создать детектив
-        </h1>
-
-        <button
-          onClick={() => setShowHowToPlay(true)}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text)',
-            padding: 'var(--spacing-sm) var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--font-size-sm)',
-          }}
-        >
-          ❓
-        </button>
-      </div>
+      <AppHeader
+        title="Создать детектив"
+        showBack
+        rightContent={
+          <button
+            onClick={() => setShowHowToPlay(true)}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              padding: 'var(--spacing-sm) var(--spacing-md)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--font-size-sm)',
+            }}
+          >
+            ❓
+          </button>
+        }
+      />
 
       {/* Контент формы */}
       <div

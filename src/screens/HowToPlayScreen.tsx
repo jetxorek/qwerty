@@ -1,8 +1,6 @@
-import { useGameStore } from '../store';
+import { AppHeader } from '../components/AppHeader';
 
 export function HowToPlayScreen() {
-  const setScreen = useGameStore((s) => s.setScreen);
-
   return (
     <div
       style={{
@@ -13,24 +11,7 @@ export function HowToPlayScreen() {
         background: 'var(--color-bg)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)' }}>
-        <button
-          onClick={() => setScreen('main_menu')}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text)',
-            padding: 'var(--spacing-sm) var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: 'var(--font-size-md)',
-          }}
-        >
-          ← Назад
-        </button>
-        <h1 style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-main)', fontSize: 'var(--font-size-xl)', margin: 0 }}>
-          ❓ Как играть
-        </h1>
-      </div>
+      <AppHeader title="❓ Как играть" showBack />
 
       <div style={{ maxWidth: '500px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
         <div style={{ padding: 'var(--spacing-lg)', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
