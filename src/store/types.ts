@@ -11,7 +11,8 @@ export type Screen =
   | 'settings'
   | 'how_to_play'
   | 'accusation'
-  | 'accusation_result';
+  | 'accusation_result'
+  | 'collection';
 
 export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence' | 'character_map';
 
@@ -82,6 +83,6 @@ export interface GameState {
 
   // Обвинение
   accusationResult: AccusationResult | null;
-  submitAccusation: (culpritId: string) => void;
+  submitAccusation: (culpritId: string, selectedNotes: Note[]) => void;
   resetAccusation: () => void;
 }

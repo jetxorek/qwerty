@@ -202,10 +202,11 @@ export function MainMenuScreen() {
           </p>
         </button>
 
-        {/* 4. Обвинение (Тест) */}
+        {/* 4. Коллекция детективов */}
         <button
-          onClick={() => setScreen('accusation')}
+          onClick={() => setScreen('collection')}
           style={{
+            marginTop: 'var(--spacing-xl)',
             padding: 'var(--spacing-lg)',
             minHeight: '120px',
             textAlign: 'left',
@@ -222,7 +223,7 @@ export function MainMenuScreen() {
               fontFamily: 'var(--font-main)',
             }}
           >
-            ⚖️ Обвинение (Тест)
+            📚 Коллекция детективов
           </h2>
           <p
             style={{
@@ -231,7 +232,7 @@ export function MainMenuScreen() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Тестовый экран обвинения
+            Другие детективные истории
           </p>
         </button>
       </div>

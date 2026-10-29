@@ -94,6 +94,12 @@ export const useGameStore = create<GameState>()(
           }
         }
         
+        // Специальная проверка: конец демо-версии (act2_scene3, end_demo)
+        if (currentSceneId === 'act2_scene3' && currentNodeId === 'end_demo') {
+          set({ currentScreen: 'accusation' });
+          return;
+        }
+        
         // Если next нет (или это choice), проверяем nextSceneId
         if (scene.nextSceneId) {
           const nextScene = SCENE_GRAPH[scene.nextSceneId];
@@ -224,11 +230,8 @@ export const useGameStore = create<GameState>()(
         set({ connections });
       },
 
-      submitAccusation: (culpritId: string) => {
-        const { notes } = get();
-        // Фильтруем только активные заметки (не отброшенные)
-        const activeNotes = notes.filter((note) => !note.discarded);
-        const result = evaluateAccusation(culpritId, activeNotes);
+      submitAccusation: (culpritId: string, selectedNotes: Note[]) => {
+        const result = evaluateAccusation(culpritId, selectedNotes);
         set({
           accusationResult: result,
           currentScreen: 'accusation_result',
