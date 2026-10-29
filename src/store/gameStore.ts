@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { GameState, NotebookView, Overlay, Screen } from './types';
 import type { Note } from '../schemas/note';
 import type { PlayerConnection } from '../schemas/connection';
-import { DEMO_SCENE } from '../data/scene';
+import { SCENE_GRAPH } from '../data/sceneGraph';
 import { findNoteInMatrix } from '../data/noteMatrix';
 
 function makeInitialData() {
@@ -12,7 +12,8 @@ function makeInitialData() {
     tutorialStepsSeen: [] as string[],
     tutorialContext: null as string | null,
     currentSceneId: null as string | null,
-    currentNodeIndex: 0,
+    currentNodeId: null as string | null,
+    isShowingIntro: false,
     activeSpeaker: null as string | null,
     overlay: 'none' as Overlay,
     notes: [] as Note[],
@@ -51,21 +52,64 @@ export const useGameStore = create<GameState>()(
         set({ tutorialContext: context });
       },
 
-      setCurrentSceneId: (id: string | null) => {
-        set({ currentSceneId: id, currentNodeIndex: 0 });
+      startStory: (sceneId: string) => {
+        const scene = SCENE_GRAPH[sceneId];
+        if (!scene) return;
+        
+        set({
+          currentSceneId: sceneId,
+          currentNodeId: scene.startNodeId,
+          isShowingIntro: true,
+          currentScreen: 'scene',
+          notes: [],
+        });
       },
 
-      setCurrentNodeIndex: (index: number) => {
-        set({ currentNodeIndex: index });
+      dismissIntro: () => {
+        set({ isShowingIntro: false });
       },
 
       advanceNode: () => {
-        const { currentSceneId, currentNodeIndex } = get();
-        if (!currentSceneId) return;
-        const scene = DEMO_SCENE;
-        if (currentNodeIndex < scene.nodes.length - 1) {
-          set({ currentNodeIndex: currentNodeIndex + 1 });
+        const { currentSceneId, currentNodeId, isShowingIntro } = get();
+        
+        // Если показывается интро, ждём dismissIntro
+        if (isShowingIntro) return;
+        
+        if (!currentSceneId || !currentNodeId) return;
+        
+        const scene = SCENE_GRAPH[currentSceneId];
+        if (!scene) return;
+        
+        const currentNode = scene.nodes[currentNodeId];
+        if (!currentNode) return;
+        
+        // Если у узла есть next (narration или dialogue), переходим к нему
+        if (currentNode.type === 'narration' || currentNode.type === 'dialogue') {
+          if (currentNode.next) {
+            set({ currentNodeId: currentNode.next });
+            return;
+          }
         }
+        
+        // Если next нет (или это choice), проверяем nextSceneId
+        if (scene.nextSceneId) {
+          const nextScene = SCENE_GRAPH[scene.nextSceneId];
+          if (nextScene) {
+            set({
+              currentSceneId: scene.nextSceneId,
+              currentNodeId: nextScene.startNodeId,
+              isShowingIntro: true,
+            });
+            return;
+          }
+        }
+        
+        // Конец контента — возвращаемся в меню
+        set({ currentScreen: 'main_menu' });
+      },
+
+      selectChoice: (nextNodeId: string) => {
+        set({ currentNodeId: nextNodeId });
       },
 
       setActiveSpeaker: (id: string | null) => {
@@ -182,7 +226,7 @@ export const useGameStore = create<GameState>()(
       partialize: (state) => ({
         tutorialStepsSeen: state.tutorialStepsSeen,
         currentSceneId: state.currentSceneId,
-        currentNodeIndex: state.currentNodeIndex,
+        currentNodeId: state.currentNodeId,
         notes: state.notes,
         connections: state.connections,
       }),
