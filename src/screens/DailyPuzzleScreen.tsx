@@ -41,6 +41,15 @@ export function DailyPuzzleScreen() {
 
   const handleClose = () => setSelectedType(null);
 
+  // Новая логика кнопки Назад
+  const handleBack = () => {
+    if (selectedType !== null) {
+      setSelectedType(null);
+    } else {
+      setScreen('main_menu');
+    }
+  };
+
   const renderContent = () => {
     if (isSolvedToday && !selectedType) {
       return (
@@ -142,9 +151,22 @@ export function DailyPuzzleScreen() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader
         title="Ежедневные дела"
-        showBack
         rightContent={
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+            <button
+              onClick={handleBack}
+              aria-label="Назад"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--color-accent)',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+              }}
+            >
+              ← Назад
+            </button>
             <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
               {progress.score}
             </span>
@@ -153,9 +175,16 @@ export function DailyPuzzleScreen() {
               aria-label="Ачивки"
               style={{
                 background: 'transparent',
-                border: 'none',
-                fontSize: '1.2rem',
+                border: '1px solid var(--color-border)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.1rem',
                 cursor: 'pointer',
+                padding: 0,
               }}
             >
               🏅
@@ -168,6 +197,7 @@ export function DailyPuzzleScreen() {
                 border: 'none',
                 fontSize: '1.2rem',
                 cursor: 'pointer',
+                padding: 0,
               }}
             >
               ❓
