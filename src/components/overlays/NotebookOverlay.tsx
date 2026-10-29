@@ -5,8 +5,10 @@ import type { Note, NoteCategory } from '../../schemas/note';
 
 const CATEGORY_LABELS: Record<NoteCategory, string> = {
   motive: '🎯 Мотив',
+  opportunity: '🎯 Возможность',
   alibi: '🕐 Алиби',
   psychology: '🧠 Психология',
+  contradiction: '⚡ Противоречие',
   evidence: '🔎 Улика',
   witness: '👁 Свидетель',
   timeline: '⏳ Хронология',
