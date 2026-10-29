@@ -59,7 +59,6 @@ export const SCENE_GRAPH: SceneGraph = {
           { text: 'Подойти к Жанне', nextNodeId: 'zhanna_1' },
         ],
       },
-      // ВЕТКА СИМОНА
       simon_1: {
         type: 'dialogue',
         speakerId: 'char_02',
@@ -71,7 +70,6 @@ export const SCENE_GRAPH: SceneGraph = {
         text: 'Пирогов отметил про себя, что Симон выглядит скорее испуганным, чем влюбленным. В этот момент к ним подошла Жанна, и атмосфера накалилась.',
         next: undefined,
       },
-      // ВЕТКА ЖАННЫ
       zhanna_1: {
         type: 'dialogue',
         speakerId: 'char_03',
