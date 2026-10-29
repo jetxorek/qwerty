@@ -201,6 +201,39 @@ export function MainMenuScreen() {
             Придумайте свою историю.
           </p>
         </button>
+
+        {/* 4. Обвинение (Тест) */}
+        <button
+          onClick={() => setScreen('accusation')}
+          style={{
+            padding: 'var(--spacing-lg)',
+            minHeight: '120px',
+            textAlign: 'left',
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-bg-panel)',
+            borderRadius: 'var(--radius-lg)',
+            color: 'var(--color-text)',
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 'var(--font-size-lg)',
+              fontFamily: 'var(--font-main)',
+            }}
+          >
+            ⚖️ Обвинение (Тест)
+          </h2>
+          <p
+            style={{
+              margin: '8px 0 0',
+              color: 'var(--color-text-muted)',
+              fontSize: 'var(--font-size-sm)',
+            }}
+          >
+            Тестовый экран обвинения
+          </p>
+        </button>
       </div>
     </div>
   );

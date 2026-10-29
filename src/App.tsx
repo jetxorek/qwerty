@@ -6,6 +6,7 @@ import { HowToPlayScreen } from './screens/HowToPlayScreen';
 import { DailyPuzzleScreen } from './screens/DailyPuzzleScreen';
 import { CaseBuilderScreen } from './screens/CaseBuilderScreen';
 import { SceneScreen } from './screens/SceneScreen';
+import { AccusationScreen } from './screens/AccusationScreen';
 
 export default function App() {
   const currentScreen = useGameStore((s) => s.currentScreen);
@@ -25,6 +26,9 @@ export default function App() {
       return <CaseBuilderScreen />;
     case 'scene':
       return <SceneScreen />;
+    case 'accusation':
+    case 'accusation_result':
+      return <AccusationScreen />;
     default:
       return <MainMenuScreen />;
   }

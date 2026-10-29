@@ -10,6 +10,7 @@ export type Screen =
   | 'case_builder'
   | 'settings'
   | 'how_to_play'
+  | 'accusation'
   | 'accusation_result';
 
 export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence' | 'character_map';
