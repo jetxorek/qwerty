@@ -1,96 +1,45 @@
-import { useEffect } from 'react';
 import { useGameStore } from '../store';
-import { TextPanel } from '../components/TextPanel';
-import { CharacterBar } from '../components/CharacterBar';
-import { ActionBar } from '../components/ActionBar';
-import { Overlays } from '../components/Overlays';
+import { SCENE_GRAPH } from '../data/sceneGraph';
 import { AppHeader } from '../components/AppHeader';
-import { DEMO_SCENE } from '../data/scene';
+import { SceneIntro } from '../components/SceneIntro';
+import { TextPanel } from '../components/TextPanel';
 
 export function SceneScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   const currentSceneId = useGameStore((s) => s.currentSceneId);
-  const currentNodeIndex = useGameStore((s) => s.currentNodeIndex);
-  const setCurrentSceneId = useGameStore((s) => s.setCurrentSceneId);
+  const currentNodeId = useGameStore((s) => s.currentNodeId);
+  const isShowingIntro = useGameStore((s) => s.isShowingIntro);
+  const dismissIntro = useGameStore((s) => s.dismissIntro);
+  
+  if (!currentSceneId || !currentNodeId) {
+    return <div style={{ padding: 'var(--spacing-lg)' }}>Сцена не загружена.</div>;
+  }
 
-  // Инициализация сцены
-  useEffect(() => {
-    if (!currentSceneId) {
-      setCurrentSceneId(DEMO_SCENE.id);
-    }
-  }, [currentSceneId, setCurrentSceneId]);
+  const scene = SCENE_GRAPH[currentSceneId];
+  if (!scene) {
+    return <div style={{ padding: 'var(--spacing-lg)' }}>Ошибка: сцена {currentSceneId} не найдена.</div>;
+  }
 
-  const scene = DEMO_SCENE;
-  const currentNode = scene.nodes[currentNodeIndex];
-
-  if (!currentNode) {
+  if (isShowingIntro) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: 'var(--spacing-lg)',
-          background: 'var(--color-bg)',
-        }}
-      >
-        <p style={{ color: 'var(--color-text-muted)' }}>Сцена не найдена.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <AppHeader title={scene.title} showBack />
+        <SceneIntro scene={scene} onStart={dismissIntro} />
       </div>
     );
   }
 
-  const isLastNode = currentNodeIndex >= scene.nodes.length - 1;
+  const node = scene.nodes[currentNodeId];
+  if (!node) {
+    return <div style={{ padding: 'var(--spacing-lg)' }}>Ошибка: узел {currentNodeId} не найден.</div>;
+  }
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        background: 'var(--color-bg)',
-      }}
-    >
-      {/* Фон-заглушка */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(180deg, #0a0a1a 0%, #0f0f2a 50%, #0a0a1a 100%)',
-          opacity: 0.5,
-          zIndex: 0,
-        }}
-      />
-
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader title={scene.title} showBack />
-
-      {/* Контент */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          paddingBottom: '80px',
-        }}
-      >
-        <TextPanel
-          speakerId={currentNode.speakerId}
-          text={currentNode.text}
-          isLastNode={isLastNode}
-        />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <TextPanel node={node} />
       </div>
-
-      {/* Панель персонажей */}
-      <CharacterBar />
-
-      {/* ActionBar (Блокнот, Схема) */}
-      <ActionBar />
-
-      {/* Оверлеи */}
-      <Overlays />
     </div>
   );
 }
