@@ -1,68 +1,74 @@
-import type { Note } from '../schemas/note';
+import type { NoteMatrixItem, Note } from '../schemas/note';
 
-type NoteMatrixEntry = Omit<Note, 'isPersonal' | 'important' | 'discarded'>;
-
-export const NOTE_MATRIX: Record<string, NoteMatrixEntry> = {
-  'Я спал': {
-    id: 'note_matrix_01',
-    text: 'Я спал',
-    statement: 'Подозреваемый утверждает, что спал в момент преступления.',
-    category: 'alibi',
-    target: 'char_02',
-    truth: 'plausible',
-  },
-  'Она смотрела на него': {
-    id: 'note_matrix_02',
-    text: 'Она смотрела на него',
-    statement: 'Свидетель заметил пристальный взгляд в сторону подозреваемого.',
+export const NOTE_MATRIX: NoteMatrixItem[] = [
+  {
+    id: 'n_01',
+    targetId: 'char_02',
     category: 'psychology',
-    target: 'char_03',
-    truth: 'true',
-  },
-  'Это всего лишь светская беседа': {
-    id: 'note_matrix_03',
-    text: 'Это всего лишь светская беседа',
-    statement: 'Саймон пытается преуменьшить значимость разговора с детективом.',
-    category: 'psychology',
-    target: 'char_02',
+    text: '«Я её люблю»',
+    statement: 'Симон утверждает, что любит Лину',
     truth: 'false',
+    isStrong: false,
   },
-  'Держаться от него подальше': {
-    id: 'note_matrix_04',
-    text: 'Держаться от него подальше',
-    statement: 'Жаклин ревностно относится к контактам Саймона с другими людьми.',
+  {
+    id: 'n_02',
+    targetId: 'char_03',
+    category: 'psychology',
+    text: '«Он женился на деньгах»',
+    statement: 'Жанна считает, что Симон женился на деньгах',
+    truth: 'true',
+    isStrong: false,
+  },
+  {
+    id: 'n_03',
+    targetId: 'char_02',
     category: 'motive',
-    target: 'char_03',
+    text: '«Наследство»',
+    statement: 'Симон наследует состояние Лины',
     truth: 'true',
+    isStrong: true,
   },
-  'Кто-то быстро скрылся за дверью каюты': {
-    id: 'note_matrix_05',
-    text: 'Кто-то быстро скрылся за дверью каюты',
-    statement: 'Неизвестный пытался скрыться — возможно, это убийца.',
-    category: 'evidence',
-    target: null,
+  {
+    id: 'n_04',
+    targetId: 'char_04',
+    category: 'psychology',
+    text: '«Он будет моим»',
+    statement: 'Лина уверена в своем влиянии на Симона',
     truth: 'true',
+    isStrong: false,
   },
-  'Мне нужно поразмыслить': {
-    id: 'note_matrix_06',
-    text: 'Мне нужно поразмыслить',
-    statement: 'Пирогов взял паузу для анализа ситуации.',
-    category: 'timeline',
-    target: 'char_01',
+  {
+    id: 'n_05',
+    targetId: 'char_03',
+    category: 'motive',
+    text: '«Я всё решила за нас двоих»',
+    statement: 'Жанна планирует что-то вместе с Симоном',
     truth: 'true',
+    isStrong: true,
   },
-};
+];
 
-export const findNoteInMatrix = (text: string): NoteMatrixEntry | undefined => {
-  // Ищем точное совпадение
-  if (NOTE_MATRIX[text]) {
-    return NOTE_MATRIX[text];
-  }
-  // Ищем частичное совпадение (фраза содержится в тексте)
-  for (const key of Object.keys(NOTE_MATRIX)) {
-    if (text.includes(key) || key.includes(text)) {
-      return NOTE_MATRIX[key];
-    }
-  }
-  return undefined;
-};
+// Функция поиска улики в матрице по выделенному тексту
+// Возвращает объект, совместимый с Note (для использования в gameStore)
+export function findNoteInMatrix(selectedText: string): Note | undefined {
+  const normalized = selectedText.trim().toLowerCase();
+  const found = NOTE_MATRIX.find((note) => {
+    const noteText = note.text.trim().toLowerCase();
+    return normalized.includes(noteText) || noteText.includes(normalized);
+  });
+  
+  if (!found) return undefined;
+  
+  // Конвертируем NoteMatrixItem в Note
+  return {
+    id: found.id,
+    text: found.text,
+    statement: found.statement,
+    category: found.category,
+    target: found.targetId,
+    isPersonal: false,
+    important: false,
+    discarded: false,
+    truth: found.truth,
+  };
+}
