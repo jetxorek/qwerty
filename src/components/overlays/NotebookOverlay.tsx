@@ -5,8 +5,10 @@ import type { Note, NoteCategory } from '../../schemas/note';
 
 const CATEGORY_LABELS: Record<NoteCategory, string> = {
   motive: '🎯 Мотив',
+  opportunity: '🎯 Возможность',
   alibi: '🕐 Алиби',
   psychology: '🧠 Психология',
+  contradiction: '⚡ Противоречие',
   evidence: '🔎 Улика',
   witness: '👁 Свидетель',
   timeline: '⏳ Хронология',
@@ -18,6 +20,11 @@ const TRUTH_COLORS: Record<string, string> = {
   false: '#a83232',
   plausible: '#c9a84c',
 };
+
+// Type guard для безопасной типизации ключей категорий
+function isNoteCategory(value: string): value is NoteCategory {
+  return value in CATEGORY_LABELS;
+}
 
 function NoteCard({ note }: { note: Note }) {
   const toggleNoteImportant = useGameStore((s) => s.toggleNoteImportant);
@@ -207,6 +214,9 @@ export function NotebookOverlay() {
     return acc;
   }, {});
 
+  // Безопасное получение типизированных ключей категорий через type guard
+  const categoryKeys = Object.keys(groupedByCategory).filter(isNoteCategory);
+
   return (
     <div
       style={{
@@ -351,25 +361,28 @@ export function NotebookOverlay() {
               Блокнот пуст. Выделите текст в сцене, чтобы добавить заметку.
             </p>
           ) : notebookView === 'categories' ? (
-            Object.entries(groupedByCategory).map(([category, categoryNotes]) => (
-              <div key={category} style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <h3
-                  style={{
-                    margin: '0 0 var(--spacing-sm)',
-                    color: 'var(--color-text-muted)',
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {CATEGORY_LABELS[category as NoteCategory]}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-                  {categoryNotes.map((note) => (
-                    <NoteCard key={note.id} note={note} />
-                  ))}
+            categoryKeys.map((category) => {
+              const categoryNotes = groupedByCategory[category];
+              return (
+                <div key={category} style={{ marginBottom: 'var(--spacing-lg)' }}>
+                  <h3
+                    style={{
+                      margin: '0 0 var(--spacing-sm)',
+                      color: 'var(--color-text-muted)',
+                      fontSize: 'var(--font-size-sm)',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {CATEGORY_LABELS[category]}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+                    {categoryNotes.map((note) => (
+                      <NoteCard key={note.id} note={note} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             Object.entries(groupedByCharacter).map(([charId, charNotes]) => {
               const character = charId === 'none' ? null : CHARACTERS.find((c) => c.id === charId);
