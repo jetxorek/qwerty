@@ -85,4 +85,7 @@ export interface GameState {
   accusationResult: AccusationResult | null;
   submitAccusation: (culpritId: string, selectedNotes: Note[]) => void;
   resetAccusation: () => void;
+
+  // Сброс прогресса
+  resetAllProgress: () => void;
 }

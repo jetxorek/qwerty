@@ -5,6 +5,7 @@ export function MainMenuScreen() {
   const hasSeenTutorial = useGameStore((s) => s.hasSeenTutorial);
   const setTutorialContext = useGameStore((s) => s.setTutorialContext);
   const startStory = useGameStore((s) => s.startStory);
+  const resetAllProgress = useGameStore((s) => s.resetAllProgress);
 
   const handleMainStory = () => {
     if (hasSeenTutorial('tutorial_main')) {
@@ -234,6 +235,23 @@ export function MainMenuScreen() {
           >
             Другие детективные истории
           </p>
+        </button>
+
+        {/* Сбросить прогресс */}
+        <button
+          onClick={resetAllProgress}
+          style={{
+            marginTop: 'var(--spacing-xl)',
+            padding: 'var(--spacing-sm)',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--color-text-muted)',
+            fontSize: 'var(--font-size-xs)',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+          }}
+        >
+          Сбросить прогресс
         </button>
       </div>
     </div>
