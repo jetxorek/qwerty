@@ -1,4 +1,4 @@
-import type { NoteMatrixItem } from '../schemas/note';
+import type { NoteMatrixItem, Note } from '../schemas/note';
 
 export const NOTE_MATRIX: NoteMatrixItem[] = [
   {
@@ -47,3 +47,28 @@ export const NOTE_MATRIX: NoteMatrixItem[] = [
     isStrong: true,
   },
 ];
+
+// Функция поиска улики в матрице по выделенному тексту
+// Возвращает объект, совместимый с Note (для использования в gameStore)
+export function findNoteInMatrix(selectedText: string): Note | undefined {
+  const normalized = selectedText.trim().toLowerCase();
+  const found = NOTE_MATRIX.find((note) => {
+    const noteText = note.text.trim().toLowerCase();
+    return normalized.includes(noteText) || noteText.includes(normalized);
+  });
+  
+  if (!found) return undefined;
+  
+  // Конвертируем NoteMatrixItem в Note
+  return {
+    id: found.id,
+    text: found.text,
+    statement: found.statement,
+    category: found.category,
+    target: found.targetId,
+    isPersonal: false,
+    important: false,
+    discarded: false,
+    truth: found.truth,
+  };
+}
