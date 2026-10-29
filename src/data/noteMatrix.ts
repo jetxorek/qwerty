@@ -49,17 +49,16 @@ export const NOTE_MATRIX: NoteMatrixItem[] = [
 ];
 
 // Функция поиска улики в матрице по выделенному тексту
-// Возвращает объект, совместимый с Note (для использования в gameStore)
+// Возвращает Note для совместимости с gameStore (маппинг targetId → target)
 export function findNoteInMatrix(selectedText: string): Note | undefined {
   const normalized = selectedText.trim().toLowerCase();
   const found = NOTE_MATRIX.find((note) => {
     const noteText = note.text.trim().toLowerCase();
     return normalized.includes(noteText) || noteText.includes(normalized);
   });
-  
+
   if (!found) return undefined;
-  
-  // Конвертируем NoteMatrixItem в Note
+
   return {
     id: found.id,
     text: found.text,

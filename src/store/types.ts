@@ -1,4 +1,5 @@
 import type { Note } from '../schemas/note';
+import type { PlayerConnection } from '../schemas/connection';
 
 export type Screen =
   | 'main_menu'
@@ -9,12 +10,11 @@ export type Screen =
   | 'settings'
   | 'how_to_play';
 
-import type { PlayerConnection } from '../schemas/connection';
-
 export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence' | 'character_map';
 
 export type NotebookView = 'categories' | 'characters';
 
+// Старые типы для обратной совместимости (используются в scene.ts)
 export interface SceneNode {
   id: string;
   speakerId?: string;
@@ -43,12 +43,14 @@ export interface GameState {
   tutorialContext: string | null;
   setTutorialContext: (context: string | null) => void;
 
-  // Сцена
+  // Сцена (граф сцен)
   currentSceneId: string | null;
-  setCurrentSceneId: (id: string | null) => void;
-  currentNodeIndex: number;
-  setCurrentNodeIndex: (index: number) => void;
+  currentNodeId: string | null;
+  isShowingIntro: boolean;
+  startStory: (sceneId: string) => void;
+  dismissIntro: () => void;
   advanceNode: () => void;
+  selectChoice: (nextNodeId: string) => void;
 
   // Активный спикер (для карточки персонажа)
   activeSpeaker: string | null;

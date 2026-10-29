@@ -4,10 +4,11 @@ export function MainMenuScreen() {
   const setScreen = useGameStore((s) => s.setScreen);
   const hasSeenTutorial = useGameStore((s) => s.hasSeenTutorial);
   const setTutorialContext = useGameStore((s) => s.setTutorialContext);
+  const startStory = useGameStore((s) => s.startStory);
 
   const handleMainStory = () => {
     if (hasSeenTutorial('tutorial_main')) {
-      setScreen('scene');
+      startStory('act1_scene1');
     } else {
       setTutorialContext('tutorial_main');
       setScreen('tutorial');
