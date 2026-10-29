@@ -3,8 +3,10 @@ import { persist } from 'zustand/middleware';
 import type { GameState, NotebookView, Overlay, Screen } from './types';
 import type { Note } from '../schemas/note';
 import type { PlayerConnection } from '../schemas/connection';
+import type { AccusationResult } from '../schemas/accusation';
 import { SCENE_GRAPH } from '../data/sceneGraph';
 import { findNoteInMatrix } from '../data/noteMatrix';
+import { evaluateAccusation } from '../engine/accusationEngine';
 
 function makeInitialData() {
   return {
@@ -19,6 +21,7 @@ function makeInitialData() {
     notes: [] as Note[],
     notebookView: 'categories' as NotebookView,
     connections: [] as PlayerConnection[],
+    accusationResult: null as AccusationResult | null,
   };
 }
 
@@ -220,6 +223,21 @@ export const useGameStore = create<GameState>()(
         const connections = get().connections.filter((c) => c.id !== id);
         set({ connections });
       },
+
+      submitAccusation: (culpritId: string) => {
+        const { notes } = get();
+        // Фильтруем только активные заметки (не отброшенные)
+        const activeNotes = notes.filter((note) => !note.discarded);
+        const result = evaluateAccusation(culpritId, activeNotes);
+        set({
+          accusationResult: result,
+          currentScreen: 'accusation_result',
+        });
+      },
+
+      resetAccusation: () => {
+        set({ accusationResult: null });
+      },
     }),
     {
       name: 'nile-game-storage',
@@ -229,6 +247,7 @@ export const useGameStore = create<GameState>()(
         currentNodeId: state.currentNodeId,
         notes: state.notes,
         connections: state.connections,
+        accusationResult: state.accusationResult,
       }),
     }
   )
