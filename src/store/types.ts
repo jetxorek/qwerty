@@ -1,5 +1,6 @@
 import type { Note } from '../schemas/note';
 import type { PlayerConnection } from '../schemas/connection';
+import type { AccusationResult } from '../schemas/accusation';
 
 export type Screen =
   | 'main_menu'
@@ -8,7 +9,8 @@ export type Screen =
   | 'daily_menu'
   | 'case_builder'
   | 'settings'
-  | 'how_to_play';
+  | 'how_to_play'
+  | 'accusation_result';
 
 export type Overlay = 'none' | 'character_card' | 'notebook' | 'evidence' | 'character_map';
 
@@ -76,4 +78,9 @@ export interface GameState {
   connections: PlayerConnection[];
   addConnection: (from: string, to: string, type: PlayerConnection['type']) => void;
   removeConnection: (id: string) => void;
+
+  // Обвинение
+  accusationResult: AccusationResult | null;
+  submitAccusation: (culpritId: string) => void;
+  resetAccusation: () => void;
 }
