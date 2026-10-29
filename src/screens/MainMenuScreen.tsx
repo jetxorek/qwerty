@@ -123,7 +123,7 @@ export function MainMenuScreen() {
               fontFamily: 'var(--font-main)',
             }}
           >
-            🕵️‍♂️ Основная история
+            🕵️‍♂️ Убийство на Волге
           </h2>
           <p
             style={{
@@ -132,7 +132,7 @@ export function MainMenuScreen() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Убийство на Ниле. Начните расследование.
+            основная история
           </p>
         </button>
 
@@ -165,7 +165,7 @@ export function MainMenuScreen() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Помогите коллегам из Скотленд-Ярда.
+            Помогите в расследованиях
           </p>
         </button>
 
