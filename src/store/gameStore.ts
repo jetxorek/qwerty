@@ -241,6 +241,26 @@ export const useGameStore = create<GameState>()(
       resetAccusation: () => {
         set({ accusationResult: null });
       },
+
+      resetAllProgress: () => {
+        // Очищаем localStorage
+        localStorage.removeItem('mfe_save_v1');
+        localStorage.removeItem('mfe_daily_progress');
+        localStorage.removeItem('mfe_daily_solved_date');
+        
+        // Сбрасываем состояние стора
+        set({
+          notes: [],
+          currentSceneId: null,
+          currentNodeId: null,
+          isShowingIntro: false,
+          accusationResult: null,
+          currentScreen: 'main_menu',
+          tutorialStepsSeen: [],
+          tutorialContext: null,
+          connections: [],
+        });
+      },
     }),
     {
       name: 'nile-game-storage',
